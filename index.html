@@ -1,160 +1,61 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Mi Libro" />
-  <title>Mi Libro Interactivo</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap" rel="stylesheet" />
-
-  <!-- Librerías para renderizar PDF y efecto de pasar página -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.min.js"></script>
-
-  <style>
-    :root {
-      --bg: #f6f4fa;
-      --surface: #ffffff;
-      --accent: #9b87f5;
-      --accent-soft: #ede9fe;
-      --text: #27233a;
-      --muted: #6e6a86;
-      --shadow: 0 12px 32px rgba(39, 35, 58, 0.12);
-    }
-
-    body.dark {
-      --bg: #16151f;
-      --surface: #211f2e;
-      --accent: #b4a5f8;
-      --accent-soft: #2e2a42;
-      --text: #f3f1fa;
-      --muted: #9e99b8;
-      --shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-    }
-
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-    }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      transition: background-color 0.25s ease, color 0.25s ease;
-    }
-
-    #upload-screen {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      padding: 28px;
-      text-align: center;
-    }
-
-    .card {
-      background: var(--surface);
-      padding: 36px 28px;
-      border-radius: 28px;
-      box-shadow: var(--shadow);
-      max-width: 380px;
-      width: 100%;
-    }
-
-    .icon-badge {
-      width: 68px;
-      height: 68px;
-      border-radius: 22px;
-      background: var(--accent-soft);
-      color: var(--accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 18px;
-      font-size: 32px;
-    }
-
-    h1 {
-      margin: 0 0 8px;
-      font-size: 1.4rem;
-      font-weight: 800;
-    }
-
-    p {
-      margin: 0 0 24px;
-      font-size: 0.95rem;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      padding: 15px 20px;
-      border: none;
-      border-radius: 16px;
-      background: var(--accent);
-      color: #fff;
-      font-family: inherit;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 6px 18px rgba(155, 135, 245, 0.35);
-    }
-
-    #file-input { display: none; }
-
-    #loading-screen {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      padding: 24px;
-      text-align: center;
-    }
-
-    .spinner {
-      width: 44px;
-      height: 44px;
-      border: 4px solid var(--accent-soft);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin-bottom: 16px;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    #reader-screen {
-      display: none;
-      flex-direction: column;
-      height: 100%;
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-
-    header {
-      height: 52px;
-      padding: 0 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .book-title {
-      font-size
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mi Libro">
+<title>Mi Libro</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.min.js"></script>
+<style>
+*{box-sizing:border-box;user-select:none;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:-apple-system,sans-serif;background:#f5f3fa;color:#27233a}
+body.dark{background:#16151f;color:#f3f1fa}
+#up,#load,#read{width:100%;height:100%;display:none;flex-direction:column;align-items:center;justify-content:center}
+#up{display:flex;padding:24px;text-align:center}
+.card{background:#fff;padding:32px 24px;border-radius:24px;box-shadow:0 10px 30px rgba(0,0,0,.08);max-width:360px;width:100%}
+body.dark .card,body.dark .btn-sm{background:#222030;color:#f3f1fa}
+.btn{width:100%;padding:15px;border:0;border-radius:14px;background:#9b87f5;color:#fff;font-size:16px;font-weight:700;margin-top:16px}
+header,footer{width:100%;height:54px;padding:0 16px;display:flex;align-items:center;justify-content:space-between}
+.btn-sm{padding:8px 12px;border:0;border-radius:10px;background:#fff;font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,.06)}
+#wrap{flex:1;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:8px}
+.pg{background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pg canvas{width:100%;height:100%;object-fit:contain}
+</style>
+</head>
+<body>
+<div id="up"><div class="card"><div style="font-size:40px">📖</div><h2>Tu Lector Personal</h2><p style="color:#6e6a86;font-size:14px">Carga tu PDF una vez. Quedará guardado en tu iPhone sin internet ni anuncios.</p><button class="btn" onclick="fi.click()">Elegir archivo PDF</button><input type="file" id="fi" accept="application/pdf" hidden></div></div>
+<div id="load"><h3 id="lt">Cargando libro...</h3><p id="ls" style="color:#6e6a86;font-size:14px"></p></div>
+<div id="read">
+<header><b id="bt" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:65%">Mi Libro</b><div><button class="btn-sm" onclick="toggleTheme()">🌙</button> <button class="btn-sm" onclick="fi.click()">📂</button></div></header>
+<div id="wrap"><div id="book"></div></div>
+<footer><button class="btn-sm" onclick="pf&&pf.flipPrev()">‹ Ant</button><span id="ind" style="font-size:14px;font-weight:600">1 / 1</span><button class="btn-sm" onclick="pf&&pf.flipNext()">Sig ›</button></footer>
+</div>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+let pf=null,tot=0;
+const show=id=>['up','load','read'].forEach(x=>document.getElementById(x).style.display=x===id?'flex':'none');
+const db=()=>new Promise((res,rej)=>{const r=indexedDB.open('BookDB',1);r.onupgradeneeded=()=>r.result.createObjectStore('s');r.onsuccess=()=>res(r.result);r.onerror=()=>rej()});
+async function saveB(d){const b=await db();return new Promise(r=>{const t=b.transaction('s','readwrite');t.objectStore('s').put(d,'b');t.oncomplete=r})}
+async function loadB(){const b=await db();return new Promise(r=>{const t=b.transaction('s','readonly');const q=t.objectStore('s').get('b');q.onsuccess=()=>r(q.result);q.onerror=()=>r(null)})}
+async function render(buf,name){
+show('load');bt.textContent=name.replace(/\.pdf$/i,'');
+const pdf=await pdfjsLib.getDocument({data:buf}).promise;tot=pdf.numPages;book.innerHTML='';
+const p1=await pdf.getPage(1),v1=p1.getViewport({scale:1}),asp=v1.width/v1.height;
+let w=wrap.clientWidth-16,h=w/asp;if(h>wrap.clientHeight-16){h=wrap.clientHeight-16;w=h*asp}
+const dpr=Math.min(devicePixelRatio||2,2.5);
+for(let i=1;i<=tot;i++){ls.textContent=`Página ${i} de ${tot}`;const p=await pdf.getPage(i),vp=p.getViewport({scale:(w/v1.width)*dpr});const d=document.createElement('div');d.className='pg';const c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;await p.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;d.appendChild(c);book.appendChild(d)}
+show('read');if(pf)pf.destroy();
+pf=new St.PageFlip(book,{width:Math.floor(w),height:Math.floor(h),size:'fixed',showCover:true,usePortrait:true,maxShadowOpacity:.3,mobileScrollSupport:false});
+pf.loadFromHTML(document.querySelectorAll('.pg'));
+const sp=+(localStorage.getItem('p_'+name)||0);if(sp>0&&sp<tot)setTimeout(()=>pf.turnToPage(sp),100);
+ind.textContent=`${sp+1} / ${tot}`;
+pf.on('flip',e=>{ind.textContent=`${e.data+1} / ${tot}`;localStorage.setItem('p_'+name,e.data)});
+}
+fi.onchange=async e=>{const f=e.target.files[0];if(!f)return;const b=await f.arrayBuffer();await saveB({b,n:f.name});render(b,f.name)};
+function toggleTheme(){document.body.classList.toggle('dark');localStorage.setItem('th',document.body.classList.contains('dark')?'1':'0')}
+onload=async()=>{if(localStorage.getItem('th')==='1')document.body.classList.add('dark');const s=await loadB();if(s)render(s.b,s.n);else show('up')};
+</script>
+</body>
+</html>
