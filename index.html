@@ -20,13 +20,13 @@ body.dark .card,body.dark .btn-sm{background:#222030;color:#f3f1fa}
 header,footer{width:100%;height:54px;padding:0 16px;display:flex;align-items:center;justify-content:space-between}
 .btn-sm{padding:8px 12px;border:0;border-radius:10px;background:#fff;font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,.06)}
 #wrap{flex:1;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:8px}
-.pg{background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pg{background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#999;font-size:14px}
 .pg canvas{width:100%;height:100%;object-fit:contain}
 </style>
 </head>
 <body>
 <div id="up"><div class="card"><div style="font-size:40px">📖</div><h2>Tu Lector Personal</h2><p style="color:#6e6a86;font-size:14px">Carga tu PDF una vez. Quedará guardado en tu iPhone sin internet ni anuncios.</p><button class="btn" onclick="fi.click()">Elegir archivo PDF</button><input type="file" id="fi" accept="application/pdf" hidden></div></div>
-<div id="load"><h3 id="lt">Cargando libro...</h3><p id="ls" style="color:#6e6a86;font-size:14px"></p></div>
+<div id="load"><h3>Abriendo libro...</h3></div>
 <div id="read">
 <header><b id="bt" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:65%">Mi Libro</b><div><button class="btn-sm" onclick="toggleTheme()">🌙</button> <button class="btn-sm" onclick="fi.click()">📂</button></div></header>
 <div id="wrap"><div id="book"></div></div>
@@ -34,24 +34,38 @@ header,footer{width:100%;height:54px;padding:0 16px;display:flex;align-items:cen
 </div>
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-let pf=null,tot=0;
+let pf=null,pdfDoc=null,tot=0,pw=0,ph=0,v1w=0,rendered=new Set();
 const show=id=>['up','load','read'].forEach(x=>document.getElementById(x).style.display=x===id?'flex':'none');
 const db=()=>new Promise((res,rej)=>{const r=indexedDB.open('BookDB',1);r.onupgradeneeded=()=>r.result.createObjectStore('s');r.onsuccess=()=>res(r.result);r.onerror=()=>rej()});
 async function saveB(d){const b=await db();return new Promise(r=>{const t=b.transaction('s','readwrite');t.objectStore('s').put(d,'b');t.oncomplete=r})}
 async function loadB(){const b=await db();return new Promise(r=>{const t=b.transaction('s','readonly');const q=t.objectStore('s').get('b');q.onsuccess=()=>r(q.result);q.onerror=()=>r(null)})}
+async function paintPage(idx){
+if(idx<0||idx>=tot||rendered.has(idx))return;
+rendered.add(idx);
+const div=document.getElementById('pg_'+idx);if(!div)return;
+const p=await pdfDoc.getPage(idx+1),vp=p.getViewport({scale:(pw/v1w)*1.8});
+const c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;
+await p.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+div.innerHTML='';div.appendChild(c);
+}
+async function paintWindow(center){
+for(let k=center-2;k<=center+3;k++)await paintPage(k);
+}
 async function render(buf,name){
-show('load');bt.textContent=name.replace(/\.pdf$/i,'');
-const pdf=await pdfjsLib.getDocument({data:buf}).promise;tot=pdf.numPages;book.innerHTML='';
-const p1=await pdf.getPage(1),v1=p1.getViewport({scale:1}),asp=v1.width/v1.height;
-let w=wrap.clientWidth-16,h=w/asp;if(h>wrap.clientHeight-16){h=wrap.clientHeight-16;w=h*asp}
-const dpr=Math.min(devicePixelRatio||2,2.5);
-for(let i=1;i<=tot;i++){ls.textContent=`Página ${i} de ${tot}`;const p=await pdf.getPage(i),vp=p.getViewport({scale:(w/v1.width)*dpr});const d=document.createElement('div');d.className='pg';const c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;await p.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;d.appendChild(c);book.appendChild(d)}
-show('read');if(pf)pf.destroy();
-pf=new St.PageFlip(book,{width:Math.floor(w),height:Math.floor(h),size:'fixed',showCover:true,usePortrait:true,maxShadowOpacity:.3,mobileScrollSupport:false});
+show('load');bt.textContent=name.replace(/\.pdf$/i,'');rendered.clear();
+pdfDoc=await pdfjsLib.getDocument({data:buf}).promise;tot=pdfDoc.numPages;book.innerHTML='';
+const p1=await pdfDoc.getPage(1),v1=p1.getViewport({scale:1}),asp=v1.width/v1.height;v1w=v1.width;
+show('read');
+pw=wrap.clientWidth-16;ph=pw/asp;if(ph>wrap.clientHeight-16){ph=wrap.clientHeight-16;pw=ph*asp}
+for(let i=0;i<tot;i++){const d=document.createElement('div');d.className='pg';d.id='pg_'+i;d.textContent=i+1;book.appendChild(d)}
+if(pf)pf.destroy();
+pf=new St.PageFlip(book,{width:Math.floor(pw),height:Math.floor(ph),size:'fixed',showCover:true,usePortrait:true,maxShadowOpacity:.3,mobileScrollSupport:false});
 pf.loadFromHTML(document.querySelectorAll('.pg'));
-const sp=+(localStorage.getItem('p_'+name)||0);if(sp>0&&sp<tot)setTimeout(()=>pf.turnToPage(sp),100);
+const sp=+(localStorage.getItem('p_'+name)||0);
+await paintWindow(sp);
+if(sp>0&&sp<tot)setTimeout(()=>pf.turnToPage(sp),80);
 ind.textContent=`${sp+1} / ${tot}`;
-pf.on('flip',e=>{ind.textContent=`${e.data+1} / ${tot}`;localStorage.setItem('p_'+name,e.data)});
+pf.on('flip',e=>{ind.textContent=`${e.data+1} / ${tot}`;localStorage.setItem('p_'+name,e.data);paintWindow(e.data)});
 }
 fi.onchange=async e=>{const f=e.target.files[0];if(!f)return;const b=await f.arrayBuffer();await saveB({b,n:f.name});render(b,f.name)};
 function toggleTheme(){document.body.classList.toggle('dark');localStorage.setItem('th',document.body.classList.contains('dark')?'1':'0')}
